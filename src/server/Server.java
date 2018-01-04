@@ -1,8 +1,12 @@
 package server;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -10,7 +14,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import client.SocetData;
 import main.Const;
 
 
@@ -20,23 +26,20 @@ public class Server {
 	private List<Connection> connections = 
 			Collections.synchronizedList(new ArrayList<Connection>());
 	private ServerSocket server;
-
+ int number=0;
 	
 	public Server() {
+               
+            
 		try {
+                    System.out.println("1");
 			server = new ServerSocket(Const.Port);
-
 			while (true) {
 				Socket socket = server.accept();
-
-				// ?????? ???? Connection ? ??????? ??? ? ??
 				Connection con = new Connection(socket);
 				connections.add(con);
-
-				// ??????????? ???? ? ??????? ??? run(),
-				// ????? ???????? ?????????? ? ????? ??????
 				con.start();
-
+                                System.out.println("2");    
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -45,16 +48,12 @@ public class Server {
 		}
 	}
 
-	/**
-	 * ??????? ?? ???? ??? ???????? ? ??? ???? ???
-	 */
+	
 	private void closeAll() {
 		try {
 			server.close();
 			
-			// ????? ??? Connection ? ??? ???? close() ??? ???????. ????
-			// synchronized {} ??????? ??? ??????? ????? ? ????? ?????
-			// ?? ???? ???
+			
 			synchronized(connections) {
 				Iterator<Connection> iter = connections.iterator();
 				while(iter.hasNext()) {
@@ -62,31 +61,33 @@ public class Server {
 				}
 			}
 		} catch (Exception e) {
-			System.err.println("???? ?? ?? ???????!");
+			System.err.println("Ошибка сети!");
 		}
 	}
 
 	
 	private class Connection extends Thread {
-		private BufferedReader in;
-		private PrintWriter out;
+		//private BufferedReader in;
+            private ObjectInputStream in;
+                
+		private ObjectOutputStream out;
 		private Socket socket;
 	
 		private String name = "";
 	
-		/**
-		 * ??????????? ???? ???? ? ?????? ??? ????????
-		 * 
-		 * @param socket
-		 *            ???, ??????? ?? server.accept()
-		 */
+		
 		public Connection(Socket socket) {
 			this.socket = socket;
 	
 			try {
-				in = new BufferedReader(new InputStreamReader(
-						socket.getInputStream()));
-				out = new PrintWriter(socket.getOutputStream(), true);
+                            System.out.println("3");
+                            InputStream inps=(socket.getInputStream());
+                              System.out.println("4");
+				 in = new ObjectInputStream(inps);
+                             
+                               // ObjectInputStream oin = new ObjectInputStream(fis);
+                               // in=new BufferedReader(new ObjectInputStream(socket.getInputStream()));
+				out = new ObjectOutputStream(socket.getOutputStream());
 	
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -97,9 +98,35 @@ public class Server {
 		
 		@Override
 		public void run() {
-			try {
-				name = in.readLine();
-				// ????? ?? ?????? ????? ? ?, ?? ???? ???? ????????
+			try {   
+                            System.out.println("6");
+                                String str = "";
+                                 
+				while (true) {
+                                    SocetData sd=new SocetData();
+                                    System.out.println("6");
+                                        sd=(SocetData)in.readObject();
+                                        System.out.println("7");
+                                        System.out.println("terminal "+sd.getValue()+ ":number of" +number);
+                                        // out.println(str + " cames now");
+					if(str.equals("exit")) break;
+                                        
+                                        if(str.equals("#number#")){
+                                                           number++;
+                                                       System.out.println("terminal "+name + ":number of" +number);
+                                                         //  out.("#number#"+ ":" + number);
+                                        }
+                                                           break;
+                                                  
+					}
+                                        
+                                        
+                                
+                                
+				//name = in.readLine();
+                               
+                                
+				/*
 				synchronized(connections) {
 					Iterator<Connection> iter = connections.iterator();
 					while(iter.hasNext()) {
@@ -111,14 +138,17 @@ public class Server {
 				while (true) {
 					str = in.readLine();
 					if(str.equals("exit")) break;
-					
-					// ????? ?? ?????? ?????? ?????
-					synchronized(connections) {
-						Iterator<Connection> iter = connections.iterator();
-						while(iter.hasNext()) {
-                                                    System.out.println(str);
-							((Connection) iter.next()).out.println(name + ": " + str);
-						}
+		
+					if(str.equals("#number#")){
+                                            synchronized(connections) {
+                                                    Iterator<Connection> iter = connections.iterator();
+                                                    while(iter.hasNext()) {
+                                                    
+                                                           number++;
+                                                       System.out.println("terminal "+name + ":number of" +number);
+                                                            ((Connection) iter.next()).out.println("#number#"+ ":" + number);}
+                                                    
+                                                  }
 					}
 				}
 				
@@ -128,31 +158,31 @@ public class Server {
 						((Connection) iter.next()).out.println(name + " has left");
 					}
 				}
+                                */
 			} catch (IOException e) {
-				e.printStackTrace();
-			} finally {
+				System.out.println(e.getMessage());
+			} catch (ClassNotFoundException ex) {
+                    Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+                } finally {
 				close();
 			}
 		}
 	
-		/**
-		 * ??????? ????? ? ?????? ???? ? ???
-		 */
+		
 		public void close() {
 			try {
 				in.close();
 				out.close();
 				socket.close();
 	
-				// ?? ????? ?? ?????? ????????, ??????? ???, ?? ???? ?
-				// ??????? ???? ???
+				
 				connections.remove(this);
 				if (connections.size() == 0) {
 					Server.this.closeAll();
 					System.exit(0);
 				}
 			} catch (Exception e) {
-				System.err.println("???? ?? ?? ???????!");
+				System.err.println("Ошибка сети");
 			}
 		}
 	}
