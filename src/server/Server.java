@@ -37,9 +37,10 @@ public class Server {
 			while (true) {
 				Socket socket = server.accept();
 				Connection con = new Connection(socket);
+                                 System.out.println("2");  
 				connections.add(con);
 				con.start();
-                                System.out.println("2");    
+                                 
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -84,13 +85,14 @@ public class Server {
                             InputStream inps=(socket.getInputStream());
                               System.out.println("4");
 				 in = new ObjectInputStream(inps);
-                             
+                               // ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+                                 System.out.println("5");
                                // ObjectInputStream oin = new ObjectInputStream(fis);
                                // in=new BufferedReader(new ObjectInputStream(socket.getInputStream()));
 				out = new ObjectOutputStream(socket.getOutputStream());
 	
-			} catch (IOException e) {
-				e.printStackTrace();
+			} catch (Exception e) {
+				 System.out.println(e.getMessage());;
 				close();
 			}
 		}
@@ -106,18 +108,21 @@ public class Server {
                                     SocetData sd=new SocetData();
                                     System.out.println("6");
                                         sd=(SocetData)in.readObject();
+                                        number++;
+                                        sd.setValue(":number of" +number);
+                                        out.writeObject(sd);
                                         System.out.println("7");
                                         System.out.println("terminal "+sd.getValue()+ ":number of" +number);
                                         // out.println(str + " cames now");
-					if(str.equals("exit")) break;
+					/*if(str.equals("exit")) break;
                                         
                                         if(str.equals("#number#")){
                                                            number++;
                                                        System.out.println("terminal "+name + ":number of" +number);
                                                          //  out.("#number#"+ ":" + number);
                                         }
-                                                           break;
-                                                  
+                                                          // break;
+                                           */       
 					}
                                         
                                         
@@ -164,7 +169,7 @@ public class Server {
 			} catch (ClassNotFoundException ex) {
                     Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
                 } finally {
-				close();
+				//close();
 			}
 		}
 	
