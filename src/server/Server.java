@@ -105,22 +105,21 @@ public class Server {
                                 String str = "";
                                  SocetData sd=new SocetData();
                                  sd=(SocetData)in.readObject();
-                                  out.writeObject(sd);
+                                 
                                  System.out.print(sd.getValue());
-                                 if(!sd.getValue().equals("test"))
+                                 if(sd.getValue().equals("test"))
                                     {
-                                    
+                                     out.writeObject(sd);} else
 				while (true) {
-                                   
                                     System.out.println("6");
-                                        sd=(SocetData)in.readObject();
+                                       // sd=(SocetData)in.readObject();
                                         number++;
-                                        sd.setValue(":number of" +number);
+                                        sd.setValue(""+number);
                                         out.writeObject(sd);
-                                        System.out.println("7");
-                                        System.out.println("terminal "+sd.getValue()+ ":number of" +number);
-                                       
-					}}
+                                        //System.out.println("7");
+                                        //System.out.println("terminal "+sd.getValue()+ ":number of" +number);
+                                        sd=(SocetData)in.readObject();
+					}
                                         
                               
 			} catch (IOException e) {
