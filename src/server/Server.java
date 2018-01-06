@@ -103,9 +103,15 @@ public class Server {
 			try {   
                             System.out.println("6");
                                 String str = "";
-                                 
+                                 SocetData sd=new SocetData();
+                                 sd=(SocetData)in.readObject();
+                                  out.writeObject(sd);
+                                 System.out.print(sd.getValue());
+                                 if(!sd.getValue().equals("test"))
+                                    {
+                                    
 				while (true) {
-                                    SocetData sd=new SocetData();
+                                   
                                     System.out.println("6");
                                         sd=(SocetData)in.readObject();
                                         number++;
@@ -113,57 +119,10 @@ public class Server {
                                         out.writeObject(sd);
                                         System.out.println("7");
                                         System.out.println("terminal "+sd.getValue()+ ":number of" +number);
-                                        // out.println(str + " cames now");
-					/*if(str.equals("exit")) break;
+                                       
+					}}
                                         
-                                        if(str.equals("#number#")){
-                                                           number++;
-                                                       System.out.println("terminal "+name + ":number of" +number);
-                                                         //  out.("#number#"+ ":" + number);
-                                        }
-                                                          // break;
-                                           */       
-					}
-                                        
-                                        
-                                
-                                
-				//name = in.readLine();
-                               
-                                
-				/*
-				synchronized(connections) {
-					Iterator<Connection> iter = connections.iterator();
-					while(iter.hasNext()) {
-						((Connection) iter.next()).out.println(name + " cames now");
-					}
-				}
-				
-				String str = "";
-				while (true) {
-					str = in.readLine();
-					if(str.equals("exit")) break;
-		
-					if(str.equals("#number#")){
-                                            synchronized(connections) {
-                                                    Iterator<Connection> iter = connections.iterator();
-                                                    while(iter.hasNext()) {
-                                                    
-                                                           number++;
-                                                       System.out.println("terminal "+name + ":number of" +number);
-                                                            ((Connection) iter.next()).out.println("#number#"+ ":" + number);}
-                                                    
-                                                  }
-					}
-				}
-				
-				synchronized(connections) {
-					Iterator<Connection> iter = connections.iterator();
-					while(iter.hasNext()) {
-						((Connection) iter.next()).out.println(name + " has left");
-					}
-				}
-                                */
+                              
 			} catch (IOException e) {
 				System.out.println(e.getMessage());
 			} catch (ClassNotFoundException ex) {
